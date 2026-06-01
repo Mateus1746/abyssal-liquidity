@@ -78,3 +78,37 @@ body {
   box-shadow: 0 0 15px currentColor;
   filter: brightness(1.2);
 }
+
+/* 🩺 VISUAL HYGIENE & ANTI-COLLISION DEBUG STYLES */
+.debug-active .collidable-element {
+  outline: 1px dashed rgba(0, 242, 255, 0.5) !important;
+  position: relative;
+}
+
+.debug-active .collidable-element::after {
+  content: "AABB";
+  position: absolute;
+  top: -12px;
+  right: 2px;
+  font-family: monospace;
+  font-size: 8px;
+  color: rgba(0, 242, 255, 0.8);
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0 4px;
+  border: 1px solid rgba(0, 242, 255, 0.5);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.debug-active .collidable-element[data-colliding="true"] {
+  outline: 2px solid #ff0055 !important;
+  background-color: rgba(255, 0, 85, 0.15) !important;
+}
+
+.debug-active .collidable-element[data-colliding="true"]::after {
+  content: "COLLISION DETECTED";
+  color: #ff0055;
+  border-color: #ff0055;
+}
+

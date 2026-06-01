@@ -8,6 +8,7 @@ import { Canvas } from '@react-three/fiber';
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Info, Zap, Activity, Radio, Cpu } from 'lucide-react';
+import { useCollisionManager } from './hooks/useCollisionManager';
 import { FluidEngine } from './components/FluidEngine';
 import { AbyssalState, PressureStatus, RealityTheme, RealityEvent } from './types';
 import { fetchRealitySync } from './services/realitySync';
@@ -29,6 +30,23 @@ export default function App() {
   const [visibleEvents, setVisibleEvents] = useState<RealityEvent[]>([]);
   const [eventProgress, setEventProgress] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState<RealityEvent | null>(null);
+
+  const { containerRef, forceRecalculate } = useCollisionManager('.collidable-element', 15);
+  const [debugActive, setDebugActive] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'd') {
+        setDebugActive(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    forceRecalculate();
+  }, [activeEventIndex, forceRecalculate]);
 
   // Theme levels logic: Progressive growth
   const themeLevels = useMemo(() => {
@@ -144,7 +162,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
+    <div className={`relative w-full h-screen bg-black overflow-hidden ${debugActive ? 'debug-active' : ''}`} ref={containerRef}>
       
       {/* Narrative Pop-up Container */}
       <AnimatePresence mode="wait">
@@ -154,7 +172,7 @@ export default function App() {
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 1.05, y: 10 }}
-            className="absolute left-10 top-10 z-30 max-w-sm pointer-events-auto"
+            className="absolute left-10 top-10 z-30 max-w-sm pointer-events-auto collidable-element"
           >
             <div className="relative group overflow-hidden">
               {/* Glass Background */}
@@ -215,7 +233,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Narration Console (Analytical Sidebar) */}
-      <div className="absolute right-10 top-1/2 -translate-y-1/2 z-20 w-80 pointer-events-none">
+      <div className="absolute right-10 top-1/2 -translate-y-1/2 z-20 w-80 pointer-events-none collidable-element">
         <AnimatePresence mode="wait">
           {activeEventIndex !== -1 && state.reality?.events && state.reality.events[activeEventIndex] && (
             <motion.div
@@ -433,7 +451,63 @@ export default function App() {
             </EffectComposer>
           </Suspense>
         </Canvas>
-      </div>
+      {debugActive && (
+        <>
+          {/* Action-Safe Zone (93%) */}
+          <div style={{
+            position: 'absolute',
+            top: '3.5%',
+            left: '3.5%',
+            width: '93%',
+            height: '93%',
+            border: '1px dashed rgba(0, 242, 255, 0.3)',
+            pointerEvents: 'none',
+            boxSizing: 'border-box',
+            zIndex: 9999
+          }}>
+            <span style={{ 
+              position: 'absolute', 
+              top: '4px', 
+              left: '6px', 
+              fontSize: '8px', 
+              color: 'rgba(0, 242, 255, 0.5)', 
+              fontFamily: 'monospace',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              padding: '1px 4px',
+              borderRadius: '2px'
+            }}>
+              ACTION-SAFE (93%)
+            </span>
+          </div>
+
+          {/* Title-Safe Zone (90%) */}
+          <div style={{
+            position: 'absolute',
+            top: '5%',
+            left: '5%',
+            width: '90%',
+            height: '90%',
+            border: '1px dashed rgba(188, 19, 254, 0.3)',
+            pointerEvents: 'none',
+            boxSizing: 'border-box',
+            zIndex: 9999
+          }}>
+            <span style={{ 
+              position: 'absolute', 
+              bottom: '4px', 
+              right: '6px', 
+              fontSize: '8px', 
+              color: 'rgba(188, 19, 254, 0.5)', 
+              fontFamily: 'monospace',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              padding: '1px 4px',
+              borderRadius: '2px'
+            }}>
+              TITLE-SAFE (90%)
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
