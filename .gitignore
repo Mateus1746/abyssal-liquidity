@@ -1,0 +1,16 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+
+# Graphify
+.graphify/
+graph.json
+graph.svg
+graph.graphml
+cypher.txt

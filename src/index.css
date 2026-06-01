@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@layer utilities {
+  @keyframes jitter {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(0.5px, -0.5px); }
+    50% { transform: translate(-0.5px, 0.5px); }
+    75% { transform: translate(0.5px, 0.5px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .animate-jitter {
+    animation: jitter 0.1s infinite;
+  }
+}
+
+@theme {
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-abyssal-black: #05070A;
+  --color-bioluminescent-cyan: #00E5FF;
+  --color-pressure-red: #FF1744;
+}
+
+:root {
+  background-color: var(--color-abyssal-black);
+  color: var(--color-bioluminescent-cyan);
+  font-family: var(--font-mono);
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Signal Interference Effect */
+.noise-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Custom Scanline Effect */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 229, 255, 0.02) 50%
+  );
+  background-size: 100% 4px;
+}
+
+/* Utility for technical UI */
+.abyssal-border {
+  border: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.abyssal-glow {
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+.h-glow {
+  box-shadow: 0 0 15px currentColor;
+  filter: brightness(1.2);
+}
