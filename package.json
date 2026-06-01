@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "render:rust": "node scripts/render_pure_rust.js",
+    "render:native": "bash scripts/render_exodus_native.sh"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
