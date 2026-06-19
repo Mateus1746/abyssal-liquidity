@@ -21,15 +21,18 @@ export interface LiquidityVector {
 
 export type RealityTheme = 'THERMAL' | 'ABYSSAL' | 'ALGO' | 'FRICTION' | 'QUANTUM';
 
-export interface RealityEvent {
+export interface TimelineEvent {
+  id?: string;
   title: string;
   theme: RealityTheme;
-  intensity: 'HIGH' | 'MEDIUM' | 'LOW';
-  impact: 'PRESSURE' | 'TEMPERATURE' | 'TURBULENCE';
+  intensity: string;
+  impact: string;
   description: string;
   analysis?: string;
   consequences?: string;
 }
+
+export interface RealityEvent extends TimelineEvent {}
 
 export interface RealitySyncData {
   globalPressure: number;
