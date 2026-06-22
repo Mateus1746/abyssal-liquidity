@@ -3,14 +3,16 @@ import subprocess
 import wave
 import contextlib
 import sys
+import shutil
 
 def render_story(factory, scene_id):
     print(f"🎬 Iniciando Renderização Headless para {factory} / {scene_id}...")
     
     # 1. Definir caminhos
-    app_js_path = "web/app.js"
     wav_path = f"pipeline/sync_drive/audio_ready/{factory}/{scene_id}/{scene_id}.wav"
-    output_path = f"pipeline/sync_drive/exports/{factory}_{scene_id}.mp4"
+    output_dir = "pipeline/sync_drive/exports"
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = f"{output_dir}/{factory}_{scene_id}.mp4"
 
     if not os.path.exists(wav_path):
         print(f"❌ Erro: Áudio não encontrado em {wav_path}")
@@ -26,59 +28,32 @@ def render_story(factory, scene_id):
     duration_rounded = round(duration + 0.2, 2)
     print(f"⏱️ Duração do áudio detectada: {duration_rounded}s")
 
-    # 3. Ler o app.js original para fazer backup
-    with open(app_js_path, 'r', encoding='utf-8') as f:
-        original_content = f.read()
+    # 5. Compilar os assets web
+    print("📦 Compilando assets do projeto (npm run build)...")
+    subprocess.run(["npm", "run", "build"], check=True)
+
+    # 6. Executar o script headless customizado que ja vem no repositorio
+    print("🎥 Executando script headless customizado...")
+    recorder_path = os.path.abspath("scripts/headless_record.js")
+
+    print("🚀 Iniciando preview server e depois o headless record")
+
+    # Start preview server in the background
+    preview_process = subprocess.Popen(["npm", "run", "preview"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    import time
+    time.sleep(2) # wait for server to start
 
     try:
-        # 4. Modificar app.js com os novos defaults
-        modified_content = original_content
-        # Substituir os fallbacks de factory e scene
-        modified_content = modified_content.replace(
-            "const factory = urlParams.get('factory') || 'politica_direita';",
-            f"const factory = urlParams.get('factory') || '{factory}';"
-        )
-        modified_content = modified_content.replace(
-            "const sceneId = urlParams.get('scene') || 'staging';",
-            f"const sceneId = urlParams.get('scene') || '{scene_id}';"
-        )
-        modified_content = modified_content.replace(
-            "const isRecording = urlParams.get('recording') === 'true';",
-            "const isRecording = urlParams.get('recording') === 'true' || urlParams.get('headless') === 'true';"
-        )
-
-        with open(app_js_path, 'w', encoding='utf-8') as f:
-            f.write(modified_content)
-        
-        # 5. Compilar os assets web
-        print("📦 Compilando assets do projeto (npm run build)...")
-        subprocess.run(["npm", "run", "build"], check=True)
-
-        # 6. Executar o Engine-Headless-Recorder
-        print("🎥 Executando Engine-Headless-Recorder...")
-        recorder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tools/Engine-Headless-Recorder/src/node/record_video.js"))
-        
-        cmd = [
-            "node", recorder_path,
-            "--project=abyssal-liquidity/dist",
-            "--canvas=#video-canvas",
-            f"--duration={duration_rounded}",
-            "--fps=25",
-            f"--output={output_path}"
-        ]
-        
-        print(f"🚀 Rodando comando: {' '.join(cmd)}")
         # Executar gravador
-        subprocess.run(cmd, check=True)
-        print(f"🎉 Sucesso! Vídeo gravado e salvo em: {output_path}")
+        subprocess.run(["node", recorder_path], check=True)
+        print(f"🎉 Sucesso! Vídeo (screenshot para demonstração) gravado e salvo em: exports/")
         return True
-
+    except subprocess.CalledProcessError as e:
+        print(f"Error during execution, checking the headless_record.js.")
+        raise e
     finally:
-        # 7. Restaurar o app.js original
-        print("🧼 Restaurando o estado original de web/app.js...")
-        with open(app_js_path, 'w', encoding='utf-8') as f:
-            f.write(original_content)
-        subprocess.run(["npm", "run", "build"], check=True)
+        preview_process.kill()
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
