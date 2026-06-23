@@ -96,7 +96,7 @@ class CoreRecorder {
       return;
     }
 
-    const timestampUs = timestampMs * 1000; // Converter milissegundos do renderizador para microssegundos
+    const timestampUs = Math.round(timestampMs * 1000); // Converter milissegundos do renderizador para microssegundos
     
     // Criar o frame WebCodecs usando o canvas
     const frame = new VideoFrame(canvas, { timestamp: timestampUs });

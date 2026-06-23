@@ -26,6 +26,10 @@ export default function App() {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
+
+    // Signal app readiness for the recorder
+    (window as any).__appReady = true;
+
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
