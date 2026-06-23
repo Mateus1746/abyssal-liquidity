@@ -86,7 +86,7 @@ export default function App() {
     processStream();
   }, [simulatedEvents, events, state]);
 
-  // Advance timeline every 8 seconds
+  // Advance timeline every 15 seconds for slower transitions
   useEffect(() => {
     if (visibleEvents.length === 0) return;
 
@@ -97,7 +97,7 @@ export default function App() {
         }
         return prev;
       });
-    }, 8000);
+    }, 15000);
 
     return () => clearInterval(interval);
   }, [visibleEvents.length]);

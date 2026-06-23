@@ -10,37 +10,35 @@ export function useSimulatedStream() {
       {
         id: '1',
         title: 'Abyssal Liquidity Influx',
-        description: 'Welcome to the deep ocean of financial waves. Liquid assets flow continuously.',
+        description: 'Nas profundezas do sistema financeiro global, trilhões de dólares fluem como correntes oceânicas abissais.',
         theme: 'ABYSSAL'
       },
       {
         id: '2',
-        title: 'Quantum Core Fluctuation',
-        description: 'Anomaly detected in the primary quantum cooling system. Containment field stability dropping by 0.4% per minute.',
-        theme: 'QUANTUM'
+        title: 'Capital Abissal: Correntes Globais',
+        description: 'A infraestrutura hidráulica do capital sustenta cada transação e cada investimento global.',
+        theme: 'ABYSSAL'
       },
       {
         id: '3',
-        title: 'Algorithmic Subroutine Deviation',
-        description: 'Pathfinding logic in sector 4 is returning non-euclidean coordinates. Potential data corruption in memory banks.',
-        theme: 'ALGO'
-      },
-      {
-        id: '4',
-        title: 'Thermal Vent Blockage',
-        description: 'Debris accumulation in exhaust vent Alpha. Temperature rising beyond optimal threshold.',
-        theme: 'THERMAL'
+        title: 'Pressão Sistêmica Estabilizada',
+        description: 'Bancos centrais regulam as marés profundas, mantendo a estabilidade da realidade financeira.',
+        theme: 'ABYSSAL'
       }
     ];
 
     let currentIndex = 0;
 
-    const interval = setInterval(() => {
+    const addEvent = () => {
       if (currentIndex < mockEvents.length) {
         setEvents(prev => [...prev, mockEvents[currentIndex] as TimelineEvent]);
         currentIndex++;
       }
-    }, 3000);
+    };
+
+    addEvent(); // Add first event immediately
+
+    const interval = setInterval(addEvent, 5000);
 
     return () => clearInterval(interval);
   }, []);
