@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 import { spawn } from 'node:child_process';
 import os from 'node:os';
+import ffmpegPath from 'ffmpeg-static';
 // Ler argumentos simples da linha de comando (ex: --project=olhos --duration=10)
 const args = {};
 process.argv.slice(2).forEach(val => {
@@ -33,24 +34,33 @@ const BITRATE = args.bitrate || 6000000;
 // --mode=gpu  → usa WebCodecs (pipeline original, requer GPU)
 // CPU_RENDER=1 (env var) → força modo CPU
 const RENDER_MODE = args.mode || (process.env.CPU_RENDER === '1' ? 'cpu' : 'cpu');
-const CPU_WORKERS = Math.max(1, Math.min(os.cpus().length, 4)); // até 4 workers
+const CPU_WORKERS = 1; // Forçar 1 worker para evitar gargalo e timeouts no ambiente Jules
 const CAPTURE_WIDTH  = Math.round((args.width  || 1280));
 const CAPTURE_HEIGHT = Math.round((args.height || 720));
 // ─────────────────────────────────────────────────────────────────────────────
 
 
 const PORT = 8080;
-const PROJECTS_BASE_DIR = path.resolve(__dirname, '../../../'); // Pasta raiz contendo Engine-Headless-Recorder e nexus_media
+const PROJECTS_BASE_DIR = path.resolve(__dirname, '../../../../'); // Pasta raiz contendo Engine-Headless-Recorder e o projeto (dist)
 const OUTPUT_FILE_PATH = args.output 
   ? path.resolve(args.output) 
-  : path.resolve(__dirname, `../../../nexus_media/video/${PROJECT_NAME}/genesis_final_SOTA.mp4`);
+  : path.resolve(__dirname, `../../../../pipeline/sync_drive/exports/${PROJECT_NAME}.mp4`);
 
 // 1. Iniciar servidor HTTP estático local para evitar restrições CORS com o OPFS e Web Workers
 function startLocalServer() {
   const server = http.createServer((req, res) => {
     // Decodificar URL e remover parâmetros de consulta
     const urlPath = decodeURIComponent(req.url.split('?')[0]);
-    const filePath = path.join(PROJECTS_BASE_DIR, urlPath);
+
+    // Mapeamento para servir a pasta dist na raiz do servidor
+    let filePath;
+    if (urlPath === '/' || urlPath === '/index.html') {
+      filePath = path.join(PROJECTS_BASE_DIR, 'dist/index.html');
+    } else if (urlPath.startsWith('/assets/')) {
+      filePath = path.join(PROJECTS_BASE_DIR, 'dist', urlPath);
+    } else {
+      filePath = path.join(PROJECTS_BASE_DIR, urlPath);
+    }
 
     // Garantir proteção contra Path Traversal
     if (!filePath.startsWith(PROJECTS_BASE_DIR)) {
@@ -162,7 +172,7 @@ async function recordCPU() {
       defaultViewport: { width: CAPTURE_WIDTH, height: CAPTURE_HEIGHT }
     });
 
-    const projectUrl = `http://127.0.0.1:${PORT}/nexus_media/video/${PROJECT_NAME}/index.html?headless=true`;
+    const projectUrl = `http://127.0.0.1:${PORT}/index.html?headless=true`;
 
     // Dividir frames entre workers
     const chunkSize = Math.ceil(totalFrames / CPU_WORKERS);
@@ -208,7 +218,7 @@ async function recordCPU() {
         OUTPUT_FILE_PATH
       ];
 
-      const ffmpeg = spawn('ffmpeg', ffmpegArgs, { stdio: ['pipe', 'inherit', 'inherit'] });
+      const ffmpeg = spawn(ffmpegPath, ffmpegArgs, { stdio: ['pipe', 'inherit', 'inherit'] });
       ffmpeg.on('error', err => reject(new Error(`FFmpeg não encontrado: ${err.message}. Instale com: apt-get install ffmpeg`)));
       ffmpeg.on('close', code => {
         if (code === 0) resolve();
@@ -271,7 +281,7 @@ async function record() {
     page.on('pageerror', err => console.error(`[BROWSER ERROR] ${err.toString()}`));
 
     // Abrir a fábrica web correspondente usando o servidor local
-    const projectUrl = `http://127.0.0.1:${PORT}/nexus_media/video/${PROJECT_NAME}/index.html?headless=true`;
+    const projectUrl = `http://127.0.0.1:${PORT}/index.html?headless=true`;
     console.log(`[RECORDER] Navegando para ${projectUrl}`);
     await page.goto(projectUrl, { waitUntil: 'networkidle0' });
 
@@ -281,7 +291,7 @@ async function record() {
 
     // 1. Injetar o CoreRecorder dinamicamente na página
     console.log(`[RECORDER] Injetando gravador na página...`);
-    await page.addScriptTag({ url: `http://127.0.0.1:${PORT}/Engine-Headless-Recorder/src/browser/recorder-core.js` });
+    await page.addScriptTag({ url: `http://127.0.0.1:${PORT}/tools/Engine-Headless-Recorder/src/browser/recorder-core.js` });
 
     // 2. Inicializar o gravador no contexto do browser
     console.log(`[RECORDER] Inicializando o CoreRecorder e abrindo fluxo fMP4 no OPFS...`);
