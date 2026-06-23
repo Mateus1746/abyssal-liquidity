@@ -18,12 +18,14 @@ export function SimulationCanvas({ state, themeLevels }: SimulationCanvasProps) 
   return (
     <div className="absolute inset-0 z-0">
       <Canvas
+        id="video-canvas"
         camera={{ position: [0, 0, 5], fov: 75 }}
         gl={{
           powerPreference: "high-performance",
           antialias: false,
           stencil: false,
-          depth: true
+          depth: true,
+          preserveDrawingBuffer: true
         }}
         dpr={[1, 1.5]}
       >

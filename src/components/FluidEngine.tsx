@@ -123,7 +123,13 @@ export const FluidEngine: React.FC<FluidEngineProps> = ({ state, themeLevels }) 
   }), []);
 
   useFrame((_state, delta) => {
-    timeRef.current += delta;
+    // Priority to deterministic time from window.__renderTimeMs
+    if ((window as any).__renderTimeMs !== undefined) {
+      timeRef.current = (window as any).__renderTimeMs / 1000;
+    } else {
+      timeRef.current += delta;
+    }
+
     if (materialRef.current) {
       const u = materialRef.current.uniforms;
       u.uTime.value = timeRef.current;
