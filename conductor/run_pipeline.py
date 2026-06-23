@@ -7,11 +7,7 @@ def run_unified_pipeline():
 
     # Passo 1: Captação de Notícias e Geração de Roteiros
     print("\n--- Passo 1: Captação de Notícias (Crawler) ---")
-    try:
-        subprocess.run(["uv", "run", "nexus_crawler.py"], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Erro ao rodar o crawler: {e}")
-        return
+    print("Skiping crawler as requested to focus on local generation.")
 
     # Passo 2: Geração de Narração e Sincronia de Legendas (Kokoro Local)
     print("\n--- Passo 2: Síntese de Voz (Kokoro Local) ---")
@@ -26,7 +22,8 @@ def run_unified_pipeline():
     staging_dir = "pipeline/sync_drive/staging"
     
     rendered_count = 0
-    for canal in ["canal_esquerda", "canal_direita"]:
+    # Include the requested style
+    for canal in ["canal_esquerda", "canal_direita", "abyssal_liquidity"]:
         canal_path = os.path.join(staging_dir, canal)
         if not os.path.exists(canal_path):
             continue

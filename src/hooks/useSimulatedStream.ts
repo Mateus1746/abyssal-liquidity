@@ -9,18 +9,24 @@ export function useSimulatedStream() {
     const mockEvents: Partial<TimelineEvent>[] = [
       {
         id: '1',
+        title: 'Abyssal Liquidity Influx',
+        description: 'Welcome to the deep ocean of financial waves. Liquid assets flow continuously.',
+        theme: 'ABYSSAL'
+      },
+      {
+        id: '2',
         title: 'Quantum Core Fluctuation',
         description: 'Anomaly detected in the primary quantum cooling system. Containment field stability dropping by 0.4% per minute.',
         theme: 'QUANTUM'
       },
       {
-        id: '2',
+        id: '3',
         title: 'Algorithmic Subroutine Deviation',
         description: 'Pathfinding logic in sector 4 is returning non-euclidean coordinates. Potential data corruption in memory banks.',
         theme: 'ALGO'
       },
       {
-        id: '3',
+        id: '4',
         title: 'Thermal Vent Blockage',
         description: 'Debris accumulation in exhaust vent Alpha. Temperature rising beyond optimal threshold.',
         theme: 'THERMAL'
